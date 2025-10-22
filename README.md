@@ -53,5 +53,6 @@ This is a simple **Library Management System** written in Java. It supports basi
 ---
 
 ## Author
-- Code written by **[Your Name]**  
+- Code written by **Shahbaj Ahmed**  
 - GUI interface implemented on top of existing logic
+
