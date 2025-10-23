@@ -1,15 +1,14 @@
 package library;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Library {
 
-    private static ArrayList<Book> books = new ArrayList<>();
-    private static ArrayList<Member> members = new ArrayList<>();
+    private ArrayList<Book> books = new ArrayList<>();
+    private ArrayList<Member> members = new ArrayList<>();
 
-    // ======= Book Management =======
-    public static void addBook(Book book) {
+    // ------------------- Book Management -------------------
+    public void addBook(Book book) {
         if (findBookById(book.getBookId()) != null) {
             System.out.println("Book with ID " + book.getBookId() + " already exists!");
             return;
@@ -18,11 +17,7 @@ public class Library {
         System.out.println("Book added: " + book.getTitle());
     }
 
-    public static List<Book> getBooks() {
-        return books;
-    }
-
-    public static void displayAllBooks() {
+    public void displayAllBooks() {
         if (books.isEmpty()) {
             System.out.println("No books available.");
             return;
@@ -33,19 +28,22 @@ public class Library {
         }
     }
 
-    public static Book searchBook(String title) {
+    public void searchBook(String title) {
+        boolean found = false;
         for (Book book : books) {
             if (book.getTitle().equalsIgnoreCase(title)) {
                 System.out.println("Found: " + book);
-                return book;
+                found = true;
+                break;
             }
         }
-        System.out.println("Book not found: " + title);
-        return null;
+        if (!found) {
+            System.out.println("Book not found: " + title);
+        }
     }
 
-    // ======= Member Management =======
-    public static void addMember(Member member) {
+    // ------------------- Member Management -------------------
+    public void addMember(Member member) {
         if (findMemberById(member.getMemberId()) != null) {
             System.out.println("Member with ID " + member.getMemberId() + " already exists!");
             return;
@@ -54,11 +52,7 @@ public class Library {
         System.out.println("Member added: " + member.getName());
     }
 
-    public static List<Member> getMembers() {
-        return members;
-    }
-
-    public static void displayAllMembers() {
+    public void displayAllMembers() {
         if (members.isEmpty()) {
             System.out.println("No members registered.");
             return;
@@ -69,22 +63,36 @@ public class Library {
         }
     }
 
-    // ======= Borrow / Return System =======
-    public static boolean borrowBook(int memberId, int bookId) {
+    // ------------------- Borrow & Return -------------------
+    public void borrowBook(int memberId, int bookId) {
         Member member = findMemberById(memberId);
         Book book = findBookById(bookId);
 
-        if (member == null || book == null) return false;
-        if (member.getBorrowedBooks().contains(book)) return false;
+        if (member == null) {
+            System.out.println("Member ID not found: " + memberId);
+            return;
+        }
+        if (book == null) {
+            System.out.println("Book ID not found: " + bookId);
+            return;
+        }
+        if (member.getBorrowedBooks().contains(book)) {
+            System.out.println(member.getName() + " already borrowed \"" + book.getTitle() + "\"");
+            return;
+        }
 
         books.remove(book);
         member.borrowBook(book);
-        return true;
+        System.out.println(member.getName() + " borrowed \"" + book.getTitle() + "\" successfully!");
     }
 
-    public static boolean returnBook(int memberId, int bookId) {
+    public void returnBook(int memberId, int bookId) {
         Member member = findMemberById(memberId);
-        if (member == null) return false;
+
+        if (member == null) {
+            System.out.println("Member ID not found: " + memberId);
+            return;
+        }
 
         Book bookToReturn = null;
         for (Book b : member.getBorrowedBooks()) {
@@ -93,25 +101,65 @@ public class Library {
                 break;
             }
         }
-        if (bookToReturn == null) return false;
+
+        if (bookToReturn == null) {
+            System.out.println(member.getName() + " did not borrow a book with ID " + bookId);
+            return;
+        }
 
         member.returnBook(bookToReturn);
         books.add(bookToReturn);
-        return true;
+        System.out.println(member.getName() + " returned \"" + bookToReturn.getTitle() + "\" successfully!");
     }
 
-    // ======= Helper Methods =======
-    private static Member findMemberById(int memberId) {
+    // ------------------- Private Helpers -------------------
+    private Member findMemberById(int memberId) {
         for (Member member : members) {
-            if (member.getMemberId() == memberId) return member;
+            if (member.getMemberId() == memberId) {
+                return member;
+            }
         }
         return null;
     }
 
-    private static Book findBookById(int bookId) {
+    private Book findBookById(int bookId) {
         for (Book book : books) {
-            if (book.getBookId() == bookId) return book;
+            if (book.getBookId() == bookId) {
+                return book;
+            }
         }
         return null;
+    }
+
+    // ------------------- GUI-Friendly Methods -------------------
+
+    // Return all books as single String
+    public String getBooksList() {
+        if (books.isEmpty()) return "No books available.";
+        StringBuilder sb = new StringBuilder();
+        for (Book book : books) {
+            sb.append(book).append("\n");
+        }
+        return sb.toString();
+    }
+
+    // Return all members as single String
+    public String getMembersList() {
+        if (members.isEmpty()) return "No members registered.";
+        StringBuilder sb = new StringBuilder();
+        for (Member member : members) {
+            sb.append(member).append("\n");
+        }
+        return sb.toString();
+    }
+
+    // GUI-friendly book search
+    public String searchBookForGUI(String title) {
+        for (Book book : books) {
+            if (book.getTitle().equalsIgnoreCase(title)) {
+                return book.toString();
+            }
+        }
+        return "Book not found: " + title;
     }
 }
